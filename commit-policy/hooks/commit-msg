@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#
+# managed-by: Atum-Labs/.github commit-policy
+#
+# Runs the org's commit-message adherence rules against the message being
+# committed, so a violation is caught here instead of on a CI check minutes
+# later. Installed by commit-policy/install-hooks.sh, which also copies the
+# rules next to this file — do not edit this copy; edit it in Atum-Labs/.github
+# and re-run the installer.
+#
+# commit-msg is the earliest hook that can see the message. pre-commit runs
+# before the message exists, so it cannot check one.
+#
+# Bypass for a single commit with `git commit --no-verify`. The CI check still
+# has the final say.
+#
+set -euo pipefail
+
+HOOK_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+CHECKER="${HOOK_DIR}/commit-policy/check-commit-messages.sh"
+
+if [ ! -x "$CHECKER" ]; then
+  echo "commit-msg hook: ${CHECKER} is missing or not executable." >&2
+  echo "Re-run Atum-Labs/.github/commit-policy/install-hooks.sh to repair it." >&2
+  exit 1
+fi
+
+exec "$CHECKER" --message-file "$1"

@@ -1,0 +1,29 @@
+name: Commit Message Adherence
+
+# Thin caller for the org's commit-message adherence check. All the logic lives
+# in Atum-Labs/.github; this file only wires it into the repo so the check can
+# be made a required status check.
+#
+# Prerequisite: the repo (or the org) must expose the DOT_GITHUB_READ_TOKEN
+# secret, which the reusable workflow uses to read the policy scripts out of the
+# private Atum-Labs/.github repo. `secrets: inherit` forwards it.
+#
+# See Atum-Labs/.github/commit-policy/README.md for the rules, the local hook,
+# and how to make this a required check.
+
+on:
+  pull_request:
+    branches: ["**"]
+    # Keep `edited`: retargeting a PR's base branch fires only that, and the
+    # check's range is computed against the base branch. Without it a retargeted
+    # PR keeps a green result that no longer reflects its commits.
+    types: [opened, synchronize, reopened, edited]
+  merge_group:
+
+permissions:
+  contents: read
+
+jobs:
+  commit-message-adherence:
+    uses: Atum-Labs/.github/.github/workflows/commit-message-adherence.yml@main
+    secrets: inherit

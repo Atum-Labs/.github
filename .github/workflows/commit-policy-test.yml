@@ -1,0 +1,36 @@
+name: Commit Policy Test
+
+# The commit-message rules in commit-policy/ are enforced org-wide from this
+# repo, so a change here can break every repo's PR check at once. Run the
+# self-test on any PR that touches them.
+
+on:
+  pull_request:
+    paths:
+      - "commit-policy/**"
+      - ".github/workflows/commit-message-adherence.yml"
+      - ".github/workflows/commit-policy-test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: commit-policy self-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Run self-test
+        run: commit-policy/test.sh
+
+      # -x so shellcheck follows the `. lib-ai-identities.sh` the rules source.
+      - name: Lint the scripts
+        run: |
+          shellcheck -x --severity=style \
+            commit-policy/check-commit-messages.sh \
+            commit-policy/install-hooks.sh \
+            commit-policy/test.sh \
+            commit-policy/rules/*.sh \
+            commit-policy/hooks/commit-msg

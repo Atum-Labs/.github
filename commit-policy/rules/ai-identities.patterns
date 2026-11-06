@@ -1,0 +1,27 @@
+# AI coding agents, as they appear in a commit's attribution.
+#
+# Shared by no-ai-coauthor-trailer (matches Co-authored-by: trailers) and
+# no-ai-commit-identity (matches the commit's author and committer). Both feed
+# the same shape — "Name <email>" — so one list covers both.
+#
+# One case-insensitive extended regular expression (ERE) per line. Blank lines
+# and # comments are ignored. ^name anchors to the start of the name; a bare
+# email matches anywhere in the string.
+#
+# To cover a new agent, add its name pattern and the address it commits as. Use
+# ([^[:alnum:]]|$) rather than \b after a name: BSD grep (macOS) does not
+# support \b.
+#
+# Deliberately NOT a blanket ban on Co-authored-by: — human co-author trailers
+# are valid and used in this org's history.
+
+# Anthropic / Claude Code
+^claude([^[:alnum:]]|$)
+noreply@anthropic\.com
+
+# Cursor
+^cursor([^[:alnum:]]|$)
+cursoragent@cursor\.com
+
+# Sculptor (Imbue)
+^sculptor([^[:alnum:]]|$)

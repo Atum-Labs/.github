@@ -1,0 +1,6 @@
+{
+  "name": "Commit Message Adherence",
+  "description": "Fail a PR whose commits break org commit-message policy — currently, crediting an AI coding agent in a Co-authored-by: trailer. Only inspects commits the PR introduces.",
+  "iconName": "octicon git-commit",
+  "categories": ["Code Quality"]
+}
