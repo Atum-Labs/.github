@@ -123,11 +123,6 @@ to `.github/workflows/commit-message-adherence.yml` in the repo, or pick
 "Commit Message Adherence" from the repo's Actions → New workflow page, which
 offers it to every org repo from this repo's `workflow-templates/`.
 
-Either way the repo needs the `DOT_GITHUB_READ_TOKEN` secret — the workflow uses
-it to read these scripts out of this private repo, the same way
-`verify-commit-signatures.yml` does. The caller forwards it with
-`secrets: inherit`.
-
 To make it required, take the check's context name from an actual completed run
 (`gh pr checks <pr>`) rather than guessing it — it depends on the route, since a
 reusable-workflow call reports as `<caller job> / <called job>`. Then add it to the

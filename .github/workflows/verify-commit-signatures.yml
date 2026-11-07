@@ -34,7 +34,6 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/.github
           path: dot-github
-          token: ${{ secrets.DOT_GITHUB_READ_TOKEN }}
 
       # The allowlist lives in a private bucket so this repo can be public. Only this workflow file may assume the reader SA (atum-core deploy/crossplane/atum-management).
       - name: Authenticate to Google Cloud

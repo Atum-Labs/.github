@@ -74,7 +74,6 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/.github
           path: dot-github
-          token: ${{ secrets.DOT_GITHUB_READ_TOKEN }}
 
       - name: Check commit messages introduced by this PR
         if: ${{ github.event_name != 'merge_group' && github.event.pull_request.head.sha != '' }}
