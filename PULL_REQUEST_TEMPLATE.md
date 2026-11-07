@@ -20,6 +20,10 @@
 <!-- Numbered, copy-pasteable steps a reviewer with no prior context can follow: any setup/prereqs, the exact commands or clicks, and the expected result at each step. Note what's already covered by automated tests vs. what needs manual checking. "Trust me" is not a test plan. -->
 1.
 
+## Customer impact
+<!-- Add exactly one label: `customer-impact: none`, `customer-impact: low`, `customer-impact: medium` or `customer-impact: high`. For medium or high, say here what changes, for whom, and what they need to do. Write "N/A" for none. -->
+- [ ] Low or above: an entry is added to this release's customer impact doc (the release owner's copy of the Release Template, named after the release)
+
 ## Out of scope
 <!-- What was intentionally NOT done here, and why (deferred / follow-up ticket / not needed). Write "N/A" if nothing. -->
 
