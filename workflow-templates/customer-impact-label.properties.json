@@ -1,0 +1,6 @@
+{
+  "name": "Customer Impact Label",
+  "description": "Fail a PR that does not carry exactly one customer-impact label (customer-impact: none, low, medium or high). Near-miss spellings fail too.",
+  "iconName": "octicon tag",
+  "categories": ["Code Quality"]
+}

@@ -1,0 +1,25 @@
+name: Customer Impact Label
+
+# Thin caller for the org's customer-impact label check. All the logic lives in
+# Atum-Labs/.github; this file only wires it into the repo so the check can be
+# made a required status check.
+#
+# Create the four labels in the repo before making the check required, or every
+# open PR without one turns red at once. See
+# Atum-Labs/.github/customer-impact-policy/README.md.
+
+on:
+  pull_request:
+    branches: ["**"]
+    # labeled/unlabeled re-run the check when the label changes.
+    types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
+  merge_group:
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+jobs:
+  customer-impact-label:
+    uses: Atum-Labs/.github/.github/workflows/customer-impact-label.yml@main
