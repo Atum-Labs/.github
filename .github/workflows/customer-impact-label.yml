@@ -3,12 +3,14 @@ name: Customer Impact Label
 # Fails unless the PR has exactly one "customer-impact: <level>" label: none,
 # low, medium or high. A near-miss spelling (customer-impact:none,
 # Customer-Impact: none, customer-impact: urgent, a trailing space) fails, alone
-# or next to a valid label. See customer-impact-policy/README.md. Usable three
+# or next to a valid label. See customer-impact-policy/README.md. Usable two
 # ways:
-#   - as an org-level required workflow, like Verify Commit Signatures
 #   - as a reusable workflow, via `uses:` from a caller (see
-#     workflow-templates/customer-impact-label.yml)
+#     workflow-templates/customer-impact-label.yml); require the caller's
+#     status check in the repo's ruleset
 #   - directly, on PRs to this repo
+# Not recommended as an org-ruleset required workflow: those ignore `types`, so
+# a label change would not re-run the check.
 #
 # Drafts are checked too: a draft without a label shows red until labeled.
 

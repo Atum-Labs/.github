@@ -28,7 +28,7 @@ Judge by what someone outside the company can observe, not by the size of the di
 - Labels are read from the API when the job runs (`gh api repos/$REPO/issues/$PR/labels --paginate`),
   not from the event payload, and counted one name per line, so a PR with more
   than one page of labels is counted correctly.
-- It re-runs on `labeled` and `unlabeled`, and runs are grouped per PR with
+- Through the per-repo caller it re-runs on `labeled` and `unlabeled` (not under an org ruleset, see "Adopt it in a repo"), and runs are grouped per PR with
   `cancel-in-progress`, so a burst of label changes ends on the final labels.
 - Drafts are checked. A draft without a label shows red until it is labeled.
 - On `merge_group` it passes through: the queue entry was checked as a PR.
@@ -72,12 +72,21 @@ customer-impact-policy/check.sh --repo Atum-Labs/.github --pr 1
    `customer-impact-label / customer-impact-label`. Add it to the repo's branch
    ruleset as a required status check.
 
-**Org-wide instead of per repo:** point an org ruleset's "Require workflows to
-pass" rule at
+**Require the per-repo caller's status check, not the org ruleset.** GitHub's
+"Require workflows to pass" rule (an org ruleset) does not honour a workflow's
+`types` filter: the workflow runs on `opened`, `synchronize` and `reopened` only
+(reported in review on [#3](https://github.com/Atum-Labs/.github/pull/3); not
+confirmed against GitHub's docs). For this check that is the wrong shape. Adding
+the missing label would leave the check red, and removing a valid label would
+leave it green, until the next push or reopen. The caller's own
+`pull_request` trigger above does honour `labeled` and `unlabeled`, so requiring
+its status check (step 3) is what keeps the label change and the result in step.
+
+Until that is settled, do not point an org ruleset at
 `Atum-Labs/.github/.github/workflows/customer-impact-label.yml@main`, the way
-`Verify Commit Signatures` is wired. That needs an org ruleset, which only an
-org admin can create; the per-repo caller and branch ruleset above is the route
-that does not.
+`Verify Commit Signatures` is wired. If it is wired that way later, a repo's
+owner should expect a stale result after a label change and push or reopen to
+refresh it.
 
 ## Test
 
