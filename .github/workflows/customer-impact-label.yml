@@ -1,0 +1,73 @@
+name: Customer Impact Label
+
+# Fails unless the PR has exactly one "customer-impact: <level>" label: none,
+# low, medium or high. A near-miss spelling (customer-impact:none,
+# Customer-Impact: none, customer-impact: urgent, a trailing space) fails, alone
+# or next to a valid label. See customer-impact-policy/README.md. Usable two
+# ways:
+#   - as a reusable workflow, via `uses:` from a caller (see
+#     workflow-templates/customer-impact-label.yml); require the caller's
+#     status check in the repo's ruleset
+#   - directly, on PRs to this repo
+# Not recommended as an org-ruleset required workflow: those ignore `types`, so
+# a label change would not re-run the check.
+#
+# Drafts are checked too: a draft without a label shows red until labeled.
+
+on:
+  workflow_call:
+  pull_request:
+    branches: ["**"]
+    # labeled/unlabeled re-run the check when the label changes;
+    # ready_for_review re-runs it when a draft is taken out of draft.
+    types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
+  merge_group:
+
+# contents: read is for checking out the policy script from this (public)
+# repo; the labels are read with pull-requests/issues read.
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+jobs:
+  customer-impact-label:
+    name: customer-impact-label
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # One run per PR. The check reads the current labels from the API, not
+    # from the event payload, so when a burst of label events cancels the
+    # earlier runs the last one still judges the final labels. The group is at
+    # job level so it also holds when this runs through workflow_call.
+    concurrency:
+      group: customer-impact-label-${{ github.repository }}-${{ github.event.pull_request.number || github.run_id }}
+      cancel-in-progress: true
+    steps:
+      # A merge-queue entry carries the labels its PR was checked with at PR
+      # time. Pass-through keeps the required-check contract satisfied without
+      # re-checking; the real gate runs on pull_request. Mirrors the same step
+      # in verify-commit-signatures.yml and commit-message-adherence.yml.
+      - name: Skip on merge_group (already checked at PR time)
+        if: ${{ github.event_name == 'merge_group' }}
+        run: echo "The customer-impact label was checked on the source PR; nothing to re-check in the merge queue."
+
+      - name: Require pull_request context
+        if: ${{ github.event_name != 'merge_group' && github.event.pull_request.head.sha == '' }}
+        run: |
+          echo "::error title=Wrong trigger::Customer Impact Label needs a pull_request (or merge_group) event; got '${{ github.event_name }}' with no pull_request payload."
+          exit 1
+
+      - name: Checkout customer-impact policy
+        if: ${{ github.event_name != 'merge_group' && github.event.pull_request.head.sha != '' }}
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          repository: ${{ github.repository_owner }}/.github
+          path: dot-github
+
+      - name: Require exactly one customer-impact label
+        if: ${{ github.event_name != 'merge_group' && github.event.pull_request.head.sha != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: dot-github/customer-impact-policy/check.sh --repo "$REPO" --pr "$PR"

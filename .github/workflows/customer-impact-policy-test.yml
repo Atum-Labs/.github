@@ -1,0 +1,32 @@
+name: Customer Impact Policy Test
+
+# The customer-impact label check is enforced org-wide from this repo, so a
+# change here can break every repo's PR check at once. Run the self-test on any
+# PR that touches it.
+
+on:
+  pull_request:
+    paths:
+      - "customer-impact-policy/**"
+      - ".github/workflows/customer-impact-label.yml"
+      - ".github/workflows/customer-impact-policy-test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: customer-impact-policy self-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Run self-test
+        run: customer-impact-policy/test.sh
+
+      - name: Lint the scripts
+        run: |
+          shellcheck --severity=style \
+            customer-impact-policy/check.sh \
+            customer-impact-policy/test.sh
