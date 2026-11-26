@@ -7,7 +7,7 @@ The first commit to a new Atum-Labs repo cannot be pushed by either the owner ac
 Atum-Labs enforces two organization-level [repository rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets):
 
 - **Protect ALL branches** (id `13148241`) — requires every commit to be signed by a verified key, blocks branch deletion, and forbids certain commit-message patterns. No bypass actors.
-- **Protect Default Branches** (id `13148604`) — requires linear history, a reviewed pull request, and a successful run of the **Verify Commit Signatures** [required workflow](https://docs.github.com/en/actions/using-workflows/required-workflows). No bypass actors.
+- **Protect Default Branches** (id `13148604`) — requires linear history, a reviewed pull request, and a successful run of the **Verify Commit Signatures** [required workflow](https://docs.github.com/en/actions/using-workflows/required-workflows). Bypass actors: the `OrganizationAdmin` role and the `atum-release-bot` app.
 
 The required-workflow rule creates a chicken-and-egg on an empty repo: the workflow can only run on a commit that exists, but the rule rejects the push before the commit lands. The web UI's "Initialize with README" hits the same wall. The error looks like:
 
@@ -65,9 +65,10 @@ jq '{name, target, enforcement, bypass_actors, conditions, rules}' \
    /tmp/ruleset-13148604.json > /tmp/ruleset-noop.json
 
 # Bypass body — core-team (id 13143826) is APPENDED to the existing bypass actors.
-# The ruleset already grants bypass to the atum-release-bot app (actor_id 4508958,
-# actor_type Integration); `+=` preserves it. Do not use `. + {bypass_actors: [...]}`,
-# which replaces the whole array and would silently revoke that app's bypass.
+# The ruleset already grants bypass to the OrganizationAdmin role (actor_id null) and
+# the atum-release-bot app (actor_id 4508958, actor_type Integration); `+=` preserves
+# both. Do not use `. + {bypass_actors: [...]}`, which replaces the whole array and
+# would silently revoke their bypass.
 jq '.bypass_actors += [{actor_id: 13143826, actor_type: "Team", bypass_mode: "always"}]' \
    /tmp/ruleset-noop.json > /tmp/ruleset-team-bypass.json
 
