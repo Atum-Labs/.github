@@ -4,10 +4,11 @@ The first commit to a new Atum-Labs repo cannot be pushed by either the owner ac
 
 ## Why a fresh repo can't accept its first commit
 
-Atum-Labs enforces two organization-level [repository rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets):
+Atum-Labs enforces three organization-level [repository rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets):
 
-- **Protect ALL branches** (id `13148241`) — requires every commit to be signed by a verified key, blocks branch deletion, and forbids certain commit-message patterns. No bypass actors.
+- **Protect ALL branches** (id `13148241`) — requires every commit to be signed by a verified key, blocks branch deletion, and forbids certain commit-message patterns. Bypass actors: the `OrganizationAdmin` role and the `atum-release-bot` app.
 - **Protect Default Branches** (id `13148604`) — requires linear history, a reviewed pull request, and a successful run of the **Verify Commit Signatures** [required workflow](https://docs.github.com/en/actions/using-workflows/required-workflows). Bypass actors: the `OrganizationAdmin` role and the `atum-release-bot` app.
+- **Require core-team review** (id `21581801`) — requires a pull request approved by `core-team` on the default branch of every non-fork repo without the `core_review_exempt` custom property. Bypass actor: the `atum-release-bot` app. It doesn't block the first push, because creating a branch isn't an update, but it does block any later direct push to `main` (see [Replacing `main` on a bootstrapped repo](#replacing-main-on-a-bootstrapped-repo)).
 
 The required-workflow rule creates a chicken-and-egg on an empty repo: the workflow can only run on a commit that exists, but the rule rejects the push before the commit lands. The web UI's "Initialize with README" hits the same wall. The error looks like:
 
@@ -108,6 +109,12 @@ diff /tmp/ruleset-noop.json /tmp/ruleset-after.json && echo "restored byte-for-b
 ```
 
 The `core-team` entry should be gone and every other actor left as it was.
+
+## Replacing `main` on a bootstrapped repo
+
+Force-pushing over an existing `main` (e.g. to squash an import down to one commit) is a direct update, so both pull-request rules apply. Run steps 3–5 against **both** `13148604` and `21581801`: snapshot each, append the `core-team` bypass to each, push, then restore and diff each. Restore both even if the push fails. The push reports two bypassed violations, "Changes must be made through a pull request" and the required workflow.
+
+The replaced commits stay fetchable by SHA on GitHub after a force-push. If they must not be reachable, for example before making the repo public, delete and recreate the repo and push the refs again instead.
 
 ## Asking Claude Code to do this
 
